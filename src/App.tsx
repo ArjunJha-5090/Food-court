@@ -8,13 +8,14 @@ import { FoodStallsPage } from './pages/FoodStallsPage';
 import { EventsPage } from './pages/EventsPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { BanquetsPage } from './pages/BanquetsPage';
+import { BlogPage } from './pages/BlogPage';
+import { MenuPage } from './pages/MenuPage';
 
 function ScrollToHashElement() {
   const { hash, pathname } = useLocation();
-  
+
   useEffect(() => {
     if (hash) {
-      // Small timeout to ensure page is rendered before scrolling
       setTimeout(() => {
         const element = document.getElementById(hash.replace('#', ''));
         if (element) {
@@ -25,7 +26,7 @@ function ScrollToHashElement() {
       window.scrollTo(0, 0);
     }
   }, [hash, pathname]);
-  
+
   return null;
 }
 
@@ -35,13 +36,12 @@ function App() {
       <ScrollToHashElement />
       <div className="font-sans text-text antialiased min-h-screen flex flex-col">
         <Navbar />
-        
+
         <main className="flex-grow relative">
-          {/* Global Decorative Background Elements */}
           <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none -z-10" />
           <div className="fixed top-[40%] left-[-200px] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] pointer-events-none -z-10" />
           <div className="fixed bottom-[-100px] right-[20%] w-[400px] h-[400px] bg-orange-500/5 rounded-full blur-[100px] pointer-events-none -z-10" />
-          
+
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -49,6 +49,8 @@ function App() {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/banquets" element={<BanquetsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/menu" element={<MenuPage />} />
           </Routes>
         </main>
 
