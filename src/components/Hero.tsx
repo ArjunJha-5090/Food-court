@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from './ui/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowRight, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

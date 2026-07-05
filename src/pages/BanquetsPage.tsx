@@ -1,640 +1,141 @@
 import React, { useState } from 'react';
 import { Coffee, Flame, UtensilsCrossed, Soup, Sparkles, IceCream, ChevronDown } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface MenuItem {
-  name: string;
-  isVeg: boolean;
-  description?: string;
-  badge?: string;
-}
+interface MenuItem { name: string; isVeg: boolean; badge?: string; }
+interface MenuCategory { title: string; icon: React.ComponentType<{ className?: string }>; description: string; items: MenuItem[]; }
 
-interface MenuCategory {
-  title: string;
-  icon: React.ComponentType<any>;
-  description: string;
-  items: MenuItem[];
-}
-
-const FoodSymbol: React.FC<{ isVeg: boolean }> = ({ isVeg }) => {
-  return (
-    <div 
-      className={`w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 ${
-        isVeg ? 'border-green-600' : 'border-red-600'
-      }`}
-      title={isVeg ? 'Vegetarian' : 'Non-Vegetarian'}
-    >
-      <div 
-        className={`w-2 h-2 rounded-full ${
-          isVeg ? 'bg-green-600' : 'bg-red-600'
-        }`}
-      />
-    </div>
-  );
-};
+const FoodSymbol: React.FC<{ isVeg: boolean }> = ({ isVeg }) => (
+  <div className={`w-4 h-4 border-2 flex items-center justify-center flex-shrink-0 ${isVeg ? 'border-green-600' : 'border-red-600'}`}>
+    <div className={`w-2 h-2 rounded-full ${isVeg ? 'bg-green-600' : 'bg-red-600'}`} />
+  </div>
+);
 
 const vegMenu: MenuCategory[] = [
-  {
-    title: 'Welcome Drink (Choose 2)',
-    icon: Coffee,
-    description: 'Refreshing hot and cold beverages to greet your guests',
-    items: [
-      { name: 'Soft Drinks (Coke, Sprite, Fanta, Thums Up)', isVeg: true },
-      { name: 'Jal Jeera', isVeg: true },
-      { name: 'Fruit Punch', isVeg: true },
-      { name: 'Tea', isVeg: true },
-      { name: 'Coffee', isVeg: true },
-      { name: 'Khus Surprise', isVeg: true },
-      { name: 'Rose Blossom', isVeg: true },
-      { name: 'Blue Lagoon', isVeg: true },
-      { name: 'Aam Ka Panna', isVeg: true },
-      { name: 'Mint Mojito', isVeg: true }
-    ]
-  },
-  {
-    title: 'Soup Veg (Choose 1)',
-    icon: Soup,
-    description: 'Warm, savory vegetable broths',
-    items: [
-      { name: 'Veg. Manchow Soup', isVeg: true },
-      { name: 'Veg. Lemon Coriander Soup', isVeg: true },
-      { name: 'Veg. Hot & Sour Soup', isVeg: true },
-      { name: 'Veg. Sweet Corn Soup', isVeg: true },
-      { name: 'Tomato Soup', isVeg: true },
-      { name: 'Tamater Dhaniya Shorba', isVeg: true }
-    ]
-  },
-  {
-    title: 'Starter Vegetable (Choose 2)',
-    icon: Flame,
-    description: 'Crispy and spiced starters cooked to perfection',
-    items: [
-      { name: 'Choice of Paneer Tikka (Hariyali, Lahsuni, Achari)', isVeg: true, badge: 'Popular' },
-      { name: 'Hara Bhara Kebab', isVeg: true },
-      { name: 'Aloo Corn Tikki', isVeg: true },
-      { name: 'Paneer Kurkure', isVeg: true },
-      { name: 'Paneer Chilli Dry', isVeg: true },
-      { name: 'Cheese Corn Ball', isVeg: true },
-      { name: 'Chilli Baby Corn', isVeg: true },
-      { name: 'Crispy Veg.', isVeg: true },
-      { name: 'Veg Cutlet', isVeg: true },
-      { name: 'Veg. Spring Roll', isVeg: true },
-      { name: 'Honey Chilli Potato', isVeg: true },
-      { name: 'Mushroom Chilli Dry', isVeg: true }
-    ]
-  },
-  {
-    title: 'Hi-Tea Counter (Choose 2)',
-    icon: Sparkles,
-    description: 'Interactive street food and fast-food counters',
-    items: [
-      { name: 'Pani-Poori Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Aloo Tikki Chaat', isVeg: true },
-      { name: 'Papdi Chaat', isVeg: true },
-      { name: 'Chhola Chaat', isVeg: true },
-      { name: 'Noodle Manchurian', isVeg: true },
-      { name: 'Litti Chokha', isVeg: true },
-      { name: 'Moong Dal Chilla Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Mini Dosa Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Pasta Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Pav-Bhaji', isVeg: true },
-      { name: 'Chole Bhature', isVeg: true }
-    ]
-  },
-  {
-    title: 'Salad (Choose 2)',
-    icon: Sparkles,
-    description: 'Healthy green and flavored accompaniments',
-    items: [
-      { name: 'Green Salad', isVeg: true },
-      { name: 'Fruits Salad', isVeg: true },
-      { name: 'Aloo Ki Chaat', isVeg: true },
-      { name: 'Macaroni Salad', isVeg: true },
-      { name: 'Sprouted Salad', isVeg: true },
-      { name: 'Russian Salad', isVeg: true },
-      { name: 'Pasta Salad', isVeg: true },
-      { name: 'Chana Chaat Salad', isVeg: true }
-    ]
-  },
-  {
-    title: 'Flavored Of Curd (Choose 1)',
-    icon: Sparkles,
-    description: 'Cooling spiced yogurts and dahi preparations',
-    items: [
-      { name: 'Mix Veg. Raita', isVeg: true },
-      { name: 'Boondi Raita', isVeg: true },
-      { name: 'Aloo And Pudina Raita', isVeg: true },
-      { name: 'Lauki Raita', isVeg: true },
-      { name: 'Fruit Raita', isVeg: true },
-      { name: 'Pineapple Mint Raita', isVeg: true },
-      { name: 'Dahi Wada', isVeg: true }
-    ]
-  },
-  {
-    title: 'Paneer Specialty (Choose 1)',
-    icon: UtensilsCrossed,
-    description: 'Exquisite cottage cheese preparations in various rich gravies',
-    items: [
-      { name: 'Paneer Butter Masala', isVeg: true },
-      { name: 'Paneer Lababdar', isVeg: true },
-      { name: 'Paneer Chatpata Masala', isVeg: true },
-      { name: 'Paneer Tawa Masala', isVeg: true },
-      { name: 'Paneer Do Pyaza', isVeg: true },
-      { name: 'Paneer Begum Bahar', isVeg: true },
-      { name: 'Paneer Kaliya', isVeg: true },
-      { name: 'Paneer Jafrani', isVeg: true },
-      { name: 'Paneer Punjabi', isVeg: true },
-      { name: 'Matar Paneer', isVeg: true },
-      { name: 'Kadhai Paneer', isVeg: true },
-      { name: 'Paneer Handi', isVeg: true },
-      { name: 'Chilly Paneer', isVeg: true }
-    ]
-  },
-  {
-    title: 'Vegetables Main (Choose 2)',
-    icon: UtensilsCrossed,
-    description: 'Delicious vegetable and potato-based slow cooked curries',
-    items: [
-      { name: 'Aloo Dum Banarsi', isVeg: true },
-      { name: 'Veg. Kofta Curry', isVeg: true },
-      { name: 'Mushroom Matar', isVeg: true },
-      { name: 'Bhindi Do Pyaza', isVeg: true },
-      { name: 'Aloo Gobi Adrakhi', isVeg: true },
-      { name: 'Subz Mela', isVeg: true },
-      { name: 'Corn Palak', isVeg: true },
-      { name: 'Mix Veg.', isVeg: true },
-      { name: 'Subz Nizami', isVeg: true },
-      { name: 'Veg. Jhalfrezi', isVeg: true },
-      { name: 'Veg. Kolhapuri', isVeg: true },
-      { name: 'Kathal Kofta', isVeg: true },
-      { name: 'Malai Kofta', isVeg: true },
-      { name: 'Methi Matar Malai', isVeg: true },
-      { name: 'Jafrani Vegetable', isVeg: true },
-      { name: 'Aloo Patal Dry', isVeg: true },
-      { name: 'Methi Aloo', isVeg: true },
-      { name: 'Kadhai Vegetable', isVeg: true },
-      { name: 'Veg Manchurian', isVeg: true },
-      { name: 'Aloo Parwal', isVeg: true },
-      { name: 'Dum Aloo', isVeg: true },
-      { name: 'Aloo Kathal', isVeg: true }
-    ]
-  },
-  {
-    title: 'Rice & Biryani (Choose 1)',
-    icon: Soup,
-    description: 'Fragrant basmati rice options and traditional biryanis',
-    items: [
-      { name: 'Moti Pulao', isVeg: true },
-      { name: 'Veg. Pulao', isVeg: true },
-      { name: 'Kashmiri Pulao', isVeg: true },
-      { name: 'Green Peas Pulao', isVeg: true },
-      { name: 'Sweet Pulao', isVeg: true },
-      { name: 'Steamed Rice', isVeg: true },
-      { name: 'Jeera Rice', isVeg: true },
-      { name: 'Veg. Biryani', isVeg: true },
-      { name: 'Kathal Biryani', isVeg: true },
-      { name: 'Paneer Biryani', isVeg: true }
-    ]
-  },
-  {
-    title: 'Dal Specialty (Choose 1)',
-    icon: Soup,
-    description: 'Rich slow-cooked lentils and beans',
-    items: [
-      { name: 'Dal Makhani', isVeg: true },
-      { name: 'Dal Panchmel', isVeg: true },
-      { name: 'Dhaba Dal', isVeg: true },
-      { name: 'Yellow Dal Tadka', isVeg: true },
-      { name: 'Chana Dal Tadka', isVeg: true },
-      { name: 'Dal Maharani', isVeg: true },
-      { name: 'Dal Makhana', isVeg: true },
-      { name: 'Chana Dal Fry', isVeg: true },
-      { name: 'Rajma Raseela', isVeg: true }
-    ]
-  },
-  {
-    title: 'Assorted Indian Breads (Choose 3)',
-    icon: Soup,
-    description: 'Clay-oven baked flatbreads and deep-fried poories',
-    items: [
-      { name: 'Naan', isVeg: true },
-      { name: 'Laccha Paratha', isVeg: true },
-      { name: 'Methi Paratha', isVeg: true },
-      { name: 'Pudina Paratha', isVeg: true },
-      { name: 'Missi Roti', isVeg: true },
-      { name: 'Tandoori Roti', isVeg: true },
-      { name: 'Stuffed Poori', isVeg: true },
-      { name: 'Palak Poori', isVeg: true },
-      { name: 'Ajwain Poori', isVeg: true },
-      { name: 'Plain Poori', isVeg: true }
-    ]
-  },
-  {
-    title: 'Indian Dessert (Choose 1)',
-    icon: IceCream,
-    description: 'Authentic Indian hot and cold desserts',
-    items: [
-      { name: 'Gulab Jamun', isVeg: true },
-      { name: 'Moong Dal Halwa', isVeg: true },
-      { name: 'Chana Dal Halwa', isVeg: true },
-      { name: 'Rasgulla', isVeg: true },
-      { name: 'Gajar Halwa', isVeg: true },
-      { name: 'Jalebi with Rabdi', isVeg: true, badge: 'Special' },
-      { name: 'Coconut Halwa', isVeg: true },
-      { name: 'Raj Bhog', isVeg: true },
-      { name: 'Semiya Payasam', isVeg: true },
-      { name: 'Rice Kheer', isVeg: true }
-    ]
-  },
-  {
-    title: 'Choice of Ice-Cream (Choose 1)',
-    icon: IceCream,
-    description: 'Chilled premium ice cream flavors',
-    items: [
-      { name: 'Vanilla', isVeg: true },
-      { name: 'Butterscotch', isVeg: true },
-      { name: 'Chocolate', isVeg: true },
-      { name: 'Strawberry', isVeg: true },
-      { name: 'Mango', isVeg: true }
-    ]
-  }
+  { title: 'Welcome Drink (Choose 2)', icon: Coffee, description: 'Refreshing hot and cold beverages to greet your guests', items: [{ name: 'Soft Drinks', isVeg: true }, { name: 'Jal Jeera', isVeg: true }, { name: 'Fruit Punch', isVeg: true }, { name: 'Tea', isVeg: true }, { name: 'Coffee', isVeg: true }, { name: 'Khus Surprise', isVeg: true }, { name: 'Rose Blossom', isVeg: true }, { name: 'Blue Lagoon', isVeg: true }, { name: 'Aam Ka Panna', isVeg: true }, { name: 'Mint Mojito', isVeg: true }] },
+  { title: 'Soup Veg (Choose 1)', icon: Soup, description: 'Warm, savory vegetable broths', items: [{ name: 'Veg. Manchow Soup', isVeg: true }, { name: 'Veg. Lemon Coriander Soup', isVeg: true }, { name: 'Veg. Hot & Sour Soup', isVeg: true }, { name: 'Veg. Sweet Corn Soup', isVeg: true }, { name: 'Tomato Soup', isVeg: true }, { name: 'Tamater Dhaniya Shorba', isVeg: true }] },
+  { title: 'Starter Vegetable (Choose 2)', icon: Flame, description: 'Crispy and spiced starters cooked to perfection', items: [{ name: 'Choice of Paneer Tikka', isVeg: true, badge: 'Popular' }, { name: 'Hara Bhara Kebab', isVeg: true }, { name: 'Aloo Corn Tikki', isVeg: true }, { name: 'Paneer Kurkure', isVeg: true }, { name: 'Paneer Chilli Dry', isVeg: true }, { name: 'Cheese Corn Ball', isVeg: true }, { name: 'Chilli Baby Corn', isVeg: true }, { name: 'Crispy Veg.', isVeg: true }, { name: 'Honey Chilli Potato', isVeg: true }, { name: 'Mushroom Chilli Dry', isVeg: true }] },
+  { title: 'Hi-Tea Counter (Choose 2)', icon: Sparkles, description: 'Interactive street food and fast-food counters', items: [{ name: 'Pani-Poori Counter', isVeg: true, badge: 'Live' }, { name: 'Aloo Tikki Chaat', isVeg: true }, { name: 'Papdi Chaat', isVeg: true }, { name: 'Chhola Chaat', isVeg: true }, { name: 'Litti Chokha', isVeg: true }, { name: 'Moong Dal Chilla Counter', isVeg: true, badge: 'Live' }, { name: 'Mini Dosa Counter', isVeg: true, badge: 'Live' }, { name: 'Pav-Bhaji', isVeg: true }, { name: 'Chole Bhature', isVeg: true }] },
+  { title: 'Paneer Specialty (Choose 1)', icon: UtensilsCrossed, description: 'Exquisite cottage cheese preparations in various rich gravies', items: [{ name: 'Paneer Butter Masala', isVeg: true }, { name: 'Paneer Lababdar', isVeg: true }, { name: 'Kadhai Paneer', isVeg: true }, { name: 'Paneer Do Pyaza', isVeg: true }, { name: 'Paneer Handi', isVeg: true }, { name: 'Matar Paneer', isVeg: true }, { name: 'Malai Kofta', isVeg: true }, { name: 'Chilly Paneer', isVeg: true }] },
+  { title: 'Vegetables Main (Choose 2)', icon: UtensilsCrossed, description: 'Delicious vegetable and potato-based slow cooked curries', items: [{ name: 'Aloo Dum Banarsi', isVeg: true }, { name: 'Veg. Kofta Curry', isVeg: true }, { name: 'Mushroom Matar', isVeg: true }, { name: 'Mix Veg.', isVeg: true }, { name: 'Corn Palak', isVeg: true }, { name: 'Methi Matar Malai', isVeg: true }, { name: 'Veg. Kolhapuri', isVeg: true }, { name: 'Dum Aloo', isVeg: true }] },
+  { title: 'Rice & Biryani (Choose 1)', icon: Soup, description: 'Fragrant basmati rice options and traditional biryanis', items: [{ name: 'Moti Pulao', isVeg: true }, { name: 'Veg. Pulao', isVeg: true }, { name: 'Kashmiri Pulao', isVeg: true }, { name: 'Jeera Rice', isVeg: true }, { name: 'Steamed Rice', isVeg: true }, { name: 'Veg. Biryani', isVeg: true }, { name: 'Paneer Biryani', isVeg: true }] },
+  { title: 'Dal Specialty (Choose 1)', icon: Soup, description: 'Rich slow-cooked lentils and beans', items: [{ name: 'Dal Makhani', isVeg: true }, { name: 'Dal Panchmel', isVeg: true }, { name: 'Yellow Dal Tadka', isVeg: true }, { name: 'Chana Dal Tadka', isVeg: true }, { name: 'Dal Maharani', isVeg: true }, { name: 'Rajma Raseela', isVeg: true }] },
+  { title: 'Assorted Indian Breads (Choose 3)', icon: Soup, description: 'Clay-oven baked flatbreads and deep-fried poories', items: [{ name: 'Naan', isVeg: true }, { name: 'Laccha Paratha', isVeg: true }, { name: 'Methi Paratha', isVeg: true }, { name: 'Tandoori Roti', isVeg: true }, { name: 'Stuffed Poori', isVeg: true }, { name: 'Plain Poori', isVeg: true }] },
+  { title: 'Indian Dessert (Choose 1)', icon: IceCream, description: 'Authentic Indian hot and cold desserts', items: [{ name: 'Gulab Jamun', isVeg: true }, { name: 'Moong Dal Halwa', isVeg: true }, { name: 'Rasgulla', isVeg: true }, { name: 'Gajar Halwa', isVeg: true }, { name: 'Jalebi with Rabdi', isVeg: true, badge: 'Special' }, { name: 'Rice Kheer', isVeg: true }] },
+  { title: 'Choice of Ice-Cream (Choose 1)', icon: IceCream, description: 'Chilled premium ice cream flavors', items: [{ name: 'Vanilla', isVeg: true }, { name: 'Butterscotch', isVeg: true }, { name: 'Chocolate', isVeg: true }, { name: 'Strawberry', isVeg: true }, { name: 'Mango', isVeg: true }] },
 ];
 
 const nonVegMenu: MenuCategory[] = [
-  {
-    title: 'Welcome Drink (Choose 2)',
-    icon: Coffee,
-    description: 'Refreshing hot and cold beverages to greet your guests',
-    items: [
-      { name: 'Soft Drinks (Coke, Sprite, Fanta, Thums Up)', isVeg: true },
-      { name: 'Jal Jeera', isVeg: true },
-      { name: 'Fruit Punch', isVeg: true },
-      { name: 'Tea', isVeg: true },
-      { name: 'Coffee', isVeg: true },
-      { name: 'Khus Surprise', isVeg: true },
-      { name: 'Rose Blossom', isVeg: true },
-      { name: 'Blue Lagoon', isVeg: true },
-      { name: 'Aam Ka Panna', isVeg: true },
-      { name: 'Mint Mojito', isVeg: true }
-    ]
-  },
-  {
-    title: 'Soup Veg (Choose 1)',
-    icon: Soup,
-    description: 'Warm, savory vegetable broths',
-    items: [
-      { name: 'Veg. Manchow Soup', isVeg: true },
-      { name: 'Veg. Lemon Coriander Soup', isVeg: true },
-      { name: 'Veg. Hot & Sour Soup', isVeg: true },
-      { name: 'Veg. Sweet Corn Soup', isVeg: true },
-      { name: 'Tomato Soup', isVeg: true },
-      { name: 'Tamater Dhaniya Shorba', isVeg: true }
-    ]
-  },
-  {
-    title: 'Soup (Non-Veg) (Choose 1)',
-    icon: Soup,
-    description: 'Flavorful non-vegetarian broths',
-    items: [
-      { name: 'Chix Manchow Soup', isVeg: false },
-      { name: 'Chix Lemon Coriander Soup', isVeg: false },
-      { name: 'Chix Hot & Sour Soup', isVeg: false }
-    ]
-  },
-  {
-    title: 'Starter Vegetable (Choose 2)',
-    icon: Flame,
-    description: 'Crispy and spiced starters cooked to perfection',
-    items: [
-      { name: 'Choice of Paneer Tikka (Hariyali, Lahsuni, Achari)', isVeg: true, badge: 'Popular' },
-      { name: 'Hara Bhara Kebab', isVeg: true },
-      { name: 'Aloo Corn Tikki', isVeg: true },
-      { name: 'Paneer Kurkure', isVeg: true },
-      { name: 'Paneer Chilli Dry', isVeg: true },
-      { name: 'Cheese Corn Ball', isVeg: true },
-      { name: 'Chilli Baby Corn', isVeg: true },
-      { name: 'Crispy Veg.', isVeg: true },
-      { name: 'Veg cutlet', isVeg: true },
-      { name: 'Veg. Spring Roll', isVeg: true },
-      { name: 'Honey Chilli Potato', isVeg: true },
-      { name: 'Mushroom Chilli Dry', isVeg: true }
-    ]
-  },
-  {
-    title: 'Starter Non-Vegetable (Choose 1)',
-    icon: Flame,
-    description: 'Succulent meat kebabs and crispy seafood starters',
-    items: [
-      { name: 'Choice of Chicken Tikka (Hariyali, Lahsuni, Achari)', isVeg: false, badge: 'Tandoor Special' },
-      { name: 'Mahi Fish Tikka', isVeg: false },
-      { name: 'Chicken Kalimirch Tikka', isVeg: false },
-      { name: 'Fish Goli Kebab', isVeg: false },
-      { name: 'Chicken Malai Tikka', isVeg: false },
-      { name: 'Chicken Chilli Dry (Boneless / Bone)', isVeg: false },
-      { name: 'Fish Finger', isVeg: false }
-    ]
-  },
-  {
-    title: 'Hi-Tea Counter (Choose 2)',
-    icon: Sparkles,
-    description: 'Interactive street food and fast-food counters',
-    items: [
-      { name: 'Pani-Poori Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Aloo Tikki Chaat', isVeg: true },
-      { name: 'Papdi Chaat', isVeg: true },
-      { name: 'Chhola Chaat', isVeg: true },
-      { name: 'Noodle Manchurian', isVeg: true },
-      { name: 'Litti Chokha', isVeg: true },
-      { name: 'Moong Dal Chilla Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Mini Dosa Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Pasta Counter', isVeg: true, badge: 'Live Counter' },
-      { name: 'Pav-Bhaji', isVeg: true }
-    ]
-  },
-  {
-    title: 'Salad (Choose 2)',
-    icon: Sparkles,
-    description: 'Healthy green and flavored accompaniments',
-    items: [
-      { name: 'Green Salad', isVeg: true },
-      { name: 'Kuchumber Salad', isVeg: true },
-      { name: 'Aloo Ki Chaat', isVeg: true },
-      { name: 'Macaroni Salad', isVeg: true },
-      { name: 'Sprouted Salad', isVeg: true },
-      { name: 'Three Beans Salad', isVeg: true },
-      { name: 'Russian Salad', isVeg: true },
-      { name: 'Pasta Salad', isVeg: true },
-      { name: 'Fruits Salad', isVeg: true },
-      { name: 'Chana Chaat Salad', isVeg: true }
-    ]
-  },
-  {
-    title: 'Flavored Of Curd (Choose 1)',
-    icon: Sparkles,
-    description: 'Cooling spiced yogurts and dahi preparations',
-    items: [
-      { name: 'Mix Veg. Raita', isVeg: true },
-      { name: 'Boondi Raita', isVeg: true },
-      { name: 'Aloo And Pudina Raita', isVeg: true },
-      { name: 'Lauki Raita', isVeg: true },
-      { name: 'Fruit Raita', isVeg: true },
-      { name: 'Dahi Wada', isVeg: true }
-    ]
-  },
-  {
-    title: 'Main Course Non-Veg (Choose 2)',
-    icon: UtensilsCrossed,
-    description: 'Slow-cooked non-vegetarian chicken and fish options',
-    items: [
-      { name: 'Choice of Chicken (Kassa, Adrakhi, Curry, Kadhai, Bhuna, Dehati, Stew, Handi, Do Pyaza, Jafrani, Dhaniya Wala)', isVeg: false, badge: 'Signature' },
-      { name: 'Choice Of Fish (Rahu Fish Fry, Fish Amritsari, Bengali Fish Curry, Fish Masala, Fish Curry)', isVeg: false }
-    ]
-  },
-  {
-    title: 'Main Course Paneer (Choose 1)',
-    icon: UtensilsCrossed,
-    description: 'Exquisite cottage cheese preparations in various rich gravies',
-    items: [
-      { name: 'Paneer Butter Masala', isVeg: true },
-      { name: 'Paneer Lababdar', isVeg: true },
-      { name: 'Paneer Chatpata Masala', isVeg: true },
-      { name: 'Paneer Tawa Masala', isVeg: true },
-      { name: 'Paneer Do Pyaza', isVeg: true },
-      { name: 'Paneer Punjabi', isVeg: true },
-      { name: 'Matar Paneer', isVeg: true },
-      { name: 'Kadhai Paneer', isVeg: true },
-      { name: 'Paneer Handi', isVeg: true },
-      { name: 'Chilly Paneer', isVeg: true }
-    ]
-  },
-  {
-    title: 'Vegetables Main (Choose 2)',
-    icon: UtensilsCrossed,
-    description: 'Delicious vegetable and potato-based slow cooked curries',
-    items: [
-      { name: 'Aloo Dum Banarsi', isVeg: true },
-      { name: 'Veg. Kofta Curry', isVeg: true },
-      { name: 'Mushroom Matar', isVeg: true },
-      { name: 'Aloo Gobi', isVeg: true },
-      { name: 'Corn Palak', isVeg: true },
-      { name: 'Mix Veg', isVeg: true },
-      { name: 'Veg. Jhalfrezi', isVeg: true },
-      { name: 'Veg. Kolhapuri', isVeg: true },
-      { name: 'Kathal Kofta', isVeg: true },
-      { name: 'Malai Kofta', isVeg: true },
-      { name: 'Aloo Patal Dry', isVeg: true },
-      { name: 'Methi Aloo', isVeg: true }
-    ]
-  },
-  {
-    title: 'Rice & Biryani (Choose 1)',
-    icon: Soup,
-    description: 'Fragrant basmati rice options and traditional biryanis',
-    items: [
-      { name: 'Moti Pulao', isVeg: true },
-      { name: 'Veg.Pulao', isVeg: true },
-      { name: 'Kashmiri Pulao', isVeg: true },
-      { name: 'Green Peas Pulao', isVeg: true },
-      { name: 'Sweet Pulao', isVeg: true },
-      { name: 'Steamed Rice', isVeg: true },
-      { name: 'Jeera Rice', isVeg: true },
-      { name: 'Veg.Biryani', isVeg: true },
-      { name: 'Paneer Biryani', isVeg: true }
-    ]
-  },
-  {
-    title: 'Dal Specialty (Choose 1)',
-    icon: Soup,
-    description: 'Rich slow-cooked lentils and beans',
-    items: [
-      { name: 'Chana Dal Tadka', isVeg: true },
-      { name: 'Dal Maharani', isVeg: true },
-      { name: 'Dal Makhana', isVeg: true },
-      { name: 'Chana Dal Fry', isVeg: true },
-      { name: 'Dal Makhani', isVeg: true }
-    ]
-  },
-  {
-    title: 'Assorted Indian Breads (Choose 3)',
-    icon: Soup,
-    description: 'Clay-oven baked flatbreads and deep-fried poories',
-    items: [
-      { name: 'Naan', isVeg: true },
-      { name: 'Laccha Paratha', isVeg: true },
-      { name: 'Methi Paratha', isVeg: true },
-      { name: 'Pudina Paratha', isVeg: true },
-      { name: 'Missi Roti', isVeg: true },
-      { name: 'Tandoori Roti', isVeg: true },
-      { name: 'Stuffed Poori', isVeg: true },
-      { name: 'Palak Poori', isVeg: true },
-      { name: 'Ajwain Poori', isVeg: true },
-      { name: 'Plain Poori', isVeg: true }
-    ]
-  },
-  {
-    title: 'Indian Dessert (Choose 1)',
-    icon: IceCream,
-    description: 'Authentic Indian hot and cold desserts',
-    items: [
-      { name: 'Gulab Jamun', isVeg: true },
-      { name: 'Moong Dal Halwa', isVeg: true },
-      { name: 'Chana Dal Halwa', isVeg: true },
-      { name: 'Rasgulla', isVeg: true },
-      { name: 'Gajar Halwa', isVeg: true },
-      { name: 'Jalebi with Rabdi', isVeg: true, badge: 'Special' },
-      { name: 'Coconut Halwa', isVeg: true },
-      { name: 'Rajbhog', isVeg: true },
-      { name: 'Semiya Payasam', isVeg: true },
-      { name: 'Rice Kheer', isVeg: true }
-    ]
-  },
-  {
-    title: 'Choice of Ice-Cream (Choose 1)',
-    icon: IceCream,
-    description: 'Chilled premium ice cream flavors',
-    items: [
-      { name: 'Vanilla', isVeg: true },
-      { name: 'Butterscotch', isVeg: true },
-      { name: 'Chocolate', isVeg: true },
-      { name: 'Strawberry', isVeg: true },
-      { name: 'Mango', isVeg: true }
-    ]
-  }
+  ...vegMenu.slice(0, 2),
+  { title: 'Soup Non-Veg (Choose 1)', icon: Soup, description: 'Flavorful non-vegetarian broths', items: [{ name: 'Chix Manchow Soup', isVeg: false }, { name: 'Chix Lemon Coriander Soup', isVeg: false }, { name: 'Chix Hot & Sour Soup', isVeg: false }] },
+  vegMenu[2],
+  { title: 'Starter Non-Veg (Choose 1)', icon: Flame, description: 'Succulent meat kebabs and crispy seafood starters', items: [{ name: 'Choice of Chicken Tikka', isVeg: false, badge: 'Tandoor Special' }, { name: 'Mahi Fish Tikka', isVeg: false }, { name: 'Chicken Malai Tikka', isVeg: false }, { name: 'Chicken Chilli Dry', isVeg: false }, { name: 'Fish Finger', isVeg: false }] },
+  ...vegMenu.slice(3, 4),
+  { title: 'Main Course Non-Veg (Choose 2)', icon: UtensilsCrossed, description: 'Slow-cooked non-vegetarian chicken and fish options', items: [{ name: 'Chicken Kassa / Adrakhi / Curry / Kadhai / Dehati', isVeg: false, badge: 'Signature' }, { name: 'Rahu Fish Fry / Bengali Fish Curry / Fish Masala', isVeg: false }] },
+  ...vegMenu.slice(4),
 ];
 
 export const BanquetsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'veg' | 'nonveg'>('veg');
-
+  const [expanded, setExpanded] = useState<number | null>(null);
   const currentMenu = activeTab === 'veg' ? vegMenu : nonVegMenu;
 
   return (
-    <div className="pt-24 pb-24 min-h-screen relative">
-      {/* Background patterns */}
-      <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Page Hero Section */}
-        <div className="text-center mb-16 flex flex-col items-center">
-          <img 
-            src="/assets/images/logo.png" 
-            alt="Metro Food Court Logo" 
-            className="w-24 h-24 object-contain rounded-full border-2 border-accent/30 shadow-md mb-6 animate-fade-in"
-          />
-          <span className="inline-block py-1 px-3 rounded-full bg-accent/20 text-accent border border-accent/30 text-sm font-medium tracking-wider uppercase mb-4">
-            Banquet Packages
-          </span>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold text-secondary mb-6">
+    <div className="pt-24 pb-24 min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Hero */}
+        <div className="text-center mb-14 flex flex-col items-center">
+          <div className="flex justify-center mb-4">
+            <Badge>Banquet Packages</Badge>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-heading text-foreground mb-6">
             Grand Banquet Silver Menus
           </h1>
-          <p className="max-w-2xl text-text/80 text-lg leading-relaxed">
-            Crafting memorable catering experiences for your grand events, weddings, and parties. Select a package below and hover over categories to preview our exquisite items.
+          <p className="max-w-2xl text-foreground/70 text-lg leading-relaxed">
+            Crafting memorable catering experiences for your grand events, weddings, and parties.
           </p>
-          <div className="indian-divider mt-8 mb-0"></div>
+          <div className="w-24 h-1 bg-main border-2 border-border shadow-shadow mt-8" />
         </div>
 
-        {/* Veg/Non-Veg Tabs */}
-        <div className="flex justify-center mb-16">
-          <div className="bg-secondary/5 p-1.5 rounded-full border border-secondary/10 flex gap-2 sm:gap-4">
-            <button
-              onClick={() => setActiveTab('veg')}
-              className={`px-6 sm:px-8 py-3 rounded-full font-heading font-semibold text-base sm:text-lg transition-all duration-300 flex items-center gap-2.5 ${
-                activeTab === 'veg'
-                  ? 'bg-secondary text-white shadow-md'
-                  : 'text-secondary hover:bg-secondary/5'
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-green-600 border border-white flex-shrink-0" />
-              Silver Veg (@900)
-            </button>
-            <button
-              onClick={() => setActiveTab('nonveg')}
-              className={`px-6 sm:px-8 py-3 rounded-full font-heading font-semibold text-base sm:text-lg transition-all duration-300 flex items-center gap-2.5 ${
-                activeTab === 'nonveg'
-                  ? 'bg-secondary text-white shadow-md'
-                  : 'text-secondary hover:bg-secondary/5'
-              }`}
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-red-600 border border-white flex-shrink-0" />
-              Silver Non-Veg (@1100)
-            </button>
-          </div>
+        {/* Veg / Non-Veg Tabs */}
+        <div className="flex justify-center mb-14">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'veg' | 'nonveg')}>
+            <TabsList>
+              <TabsTrigger value="veg" className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-600 border border-border" />
+                Silver Veg (@900)
+              </TabsTrigger>
+              <TabsTrigger value="nonveg" className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-600 border border-border" />
+                Silver Non-Veg (@1100)
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
-        {/* Categories Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+        {/* Menu Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
           {currentMenu.map((category, index) => {
             const IconComponent = category.icon;
+            const isOpen = expanded === index;
             return (
-              <div 
-                key={index} 
-                className="group premium-card p-6 flex flex-col transition-all duration-300 relative border border-accent/20 hover:border-primary/50 cursor-pointer bg-white"
+              <Card
+                key={index}
+                className="cursor-pointer hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform duration-150"
+                onClick={() => setExpanded(isOpen ? null : index)}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-                    <IconComponent className="w-6 h-6" />
+                <CardContent className="p-6 flex flex-col gap-3">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-main border-2 border-border shadow-shadow flex items-center justify-center text-main-foreground flex-shrink-0">
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <div className="flex-grow">
+                      <h3 className="font-heading text-lg text-foreground leading-tight">{category.title}</h3>
+                      <p className="text-foreground/50 text-xs mt-0.5">{category.items.length} items</p>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-foreground/50 transition-transform duration-300 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
                   </div>
-                  <div className="flex-grow">
-                    <h3 className="font-heading font-bold text-xl text-secondary group-hover:text-primary transition-colors duration-300">
-                      {category.title}
-                    </h3>
-                    <p className="text-text/60 text-xs mt-0.5">
-                      {category.items.length} Culinary Delights
-                    </p>
-                  </div>
-                  <ChevronDown className="w-5 h-5 text-accent group-hover:rotate-180 transition-transform duration-500" />
-                </div>
-                
-                <p className="text-text/75 text-sm mt-4 leading-relaxed">
-                  {category.description}
-                </p>
 
-                {/* Dropdown items reveal container (Hover Reveal with slide & fade animation) */}
-                <div className="overflow-hidden transition-all duration-500 ease-in-out max-h-0 opacity-0 group-hover:max-h-[800px] group-hover:opacity-100 group-hover:mt-6">
-                  <div className="pt-4 border-t border-accent/15 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 transform translate-y-[-10px] group-hover:translate-y-0 transition-transform duration-500">
-                    {category.items.map((item, itemIdx) => (
-                      <div key={itemIdx} className="flex gap-2 items-center group/item p-1.5 rounded-lg hover:bg-orange-50/50 transition-colors">
-                        <FoodSymbol isVeg={item.isVeg} />
-                        <span className="font-sans font-semibold text-text text-sm group-hover/item:text-primary transition-colors leading-tight">
-                          {item.name}
-                        </span>
-                        {item.badge && (
-                          <span className="text-[8px] font-semibold bg-accent/20 text-secondary border border-accent/30 rounded-full px-1.5 py-0.5 uppercase tracking-wider whitespace-nowrap">
-                            {item.badge}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                  <p className="text-foreground/70 text-sm leading-relaxed">{category.description}</p>
+
+                  {isOpen && (
+                    <div className="pt-4 border-t-2 border-border grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                      {category.items.map((item, i) => (
+                        <div key={i} className="flex gap-2 items-center py-1">
+                          <FoodSymbol isVeg={item.isVeg} />
+                          <span className="text-foreground text-sm leading-tight">{item.name}</span>
+                          {item.badge && <Badge className="text-[9px] px-1.5 py-0">{item.badge}</Badge>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             );
           })}
         </div>
 
-        {/* Booking Call to Action */}
-        <div className="mt-20 text-center bg-white rounded-3xl shadow-xl p-12 border border-accent/15 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] pointer-events-none" />
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-3xl font-heading font-bold text-secondary mb-4">Book Your Banquet Today</h2>
-            <p className="text-text/80 text-lg mb-8 leading-relaxed">
-              Whether you need customized menus, extra live stalls, or structural setups, our team handles it all with perfection. Reach out to schedule a testing session or book the venue.
+        {/* Booking CTA */}
+        <Card className="mt-16">
+          <CardContent className="flex flex-col items-center text-center gap-6 py-12">
+            <h2 className="text-3xl font-heading text-foreground">Book Your Banquet Today</h2>
+            <p className="text-foreground/70 text-lg max-w-2xl leading-relaxed">
+              Whether you need customized menus, extra live stalls, or structural setups, our team handles it all with perfection.
             </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <a 
-                href="/#contact" 
-                className="inline-flex items-center justify-center px-8 py-3.5 border border-transparent text-base font-semibold rounded-lg shadow-sm text-white bg-primary hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
-              >
-                Inquire & Book
-              </a>
-              <a 
-                href="tel:+911234567890" 
-                className="inline-flex items-center justify-center px-8 py-3.5 border border-secondary text-base font-semibold rounded-lg text-secondary bg-white hover:bg-secondary/5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-colors duration-200"
-              >
-                Call Event Coordinator
-              </a>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button size="lg" asChild>
+                <a href="/#contact">Inquire & Book</a>
+              </Button>
+              <Button size="lg" variant="neutral" asChild>
+                <a href="tel:+916287601908">Call Event Coordinator</a>
+              </Button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
       </div>
     </div>

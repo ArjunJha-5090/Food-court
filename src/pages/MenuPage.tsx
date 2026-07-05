@@ -1,32 +1,21 @@
 import React, { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface MenuItem {
-  name: string;
-  price: string;
-  isVeg?: boolean;
-  isEgg?: boolean;
-}
+interface MenuItem { name: string; price: string; isVeg?: boolean; isEgg?: boolean; }
+interface MenuSection { title: string; note?: string; items: MenuItem[]; }
 
-interface MenuSection {
-  title: string;
-  note?: string;
-  items: MenuItem[];
-}
-
-// ── veg indicator dot ────────────────────────────────────────────
 const VegDot: React.FC<{ isVeg?: boolean; isEgg?: boolean }> = ({ isVeg, isEgg }) => {
-  if (isEgg)
-    return (
-      <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-yellow-500 flex-shrink-0">
-        <span className="w-2 h-2 rounded-full bg-yellow-500" />
-      </span>
-    );
-  if (isVeg)
-    return (
-      <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-green-600 flex-shrink-0">
-        <span className="w-2 h-2 rounded-full bg-green-600" />
-      </span>
-    );
+  if (isEgg) return (
+    <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-amber-600 flex-shrink-0">
+      <span className="w-2 h-2 rounded-full bg-amber-600" />
+    </span>
+  );
+  if (isVeg) return (
+    <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-green-600 flex-shrink-0">
+      <span className="w-2 h-2 rounded-full bg-green-600" />
+    </span>
+  );
   return (
     <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-red-600 flex-shrink-0">
       <span className="w-2 h-2 rounded-full bg-red-600" />
@@ -34,228 +23,49 @@ const VegDot: React.FC<{ isVeg?: boolean; isEgg?: boolean }> = ({ isVeg, isEgg }
   );
 };
 
-// ── section card ─────────────────────────────────────────────────
-const MenuCard: React.FC<{ section: MenuSection; accent?: string }> = ({
-  section,
-  accent = 'bg-primary',
-}) => (
-  <div className="bg-white rounded-2xl shadow-sm border border-orange-100 overflow-hidden">
-    {/* Header */}
-    <div className={`${accent} px-6 py-4`}>
-      <h3 className="font-heading text-xl font-bold text-white uppercase tracking-widest">
-        {section.title}
-      </h3>
-      {section.note && (
-        <p className="text-white/70 text-xs mt-1 font-medium">{section.note}</p>
-      )}
+const MenuCard: React.FC<{ section: MenuSection; accentClass?: string; filterTab: string }> = ({ section, accentClass = 'bg-main', filterTab }) => {
+  const filteredItems = section.items.filter(item => {
+    if (filterTab === 'all') return true;
+    if (filterTab === 'veg') return item.isVeg === true;
+    if (filterTab === 'nonveg') return item.isVeg === false || item.isEgg === true;
+    return true;
+  });
+
+  if (filteredItems.length === 0) return null;
+
+  return (
+    <div className="border-2 border-border shadow-shadow overflow-hidden">
+      <div className={`${accentClass} px-6 py-4 border-b-2 border-border`}>
+        <h3 className="font-heading text-xl text-white uppercase tracking-widest">{section.title}</h3>
+        {section.note && <p className="text-white/70 text-xs mt-1">{section.note}</p>}
+      </div>
+      <ul className="divide-y-2 divide-border bg-secondary-background">
+        {filteredItems.map((item, i) => (
+          <li key={i} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-background transition-colors group">
+            <div className="flex items-center gap-2.5 min-w-0">
+              {(item.isVeg !== undefined || item.isEgg) && <VegDot isVeg={item.isVeg} isEgg={item.isEgg} />}
+              <span className="text-sm text-foreground leading-snug">{i + 1}. {item.name}</span>
+            </div>
+            <span className="font-heading font-bold text-main text-sm whitespace-nowrap">₹{item.price}</span>
+          </li>
+        ))}
+      </ul>
     </div>
-    {/* Items */}
-    <ul className="divide-y divide-orange-50">
-      {section.items.map((item, i) => (
-        <li
-          key={i}
-          className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-orange-50/60 transition-colors group"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            {item.isVeg !== undefined && (
-              <VegDot isVeg={item.isVeg} isEgg={item.isEgg} />
-            )}
-            <span className="font-sans text-sm text-secondary group-hover:text-primary transition-colors leading-snug">
-              {i + 1}. {item.name}
-            </span>
-          </div>
-          <span className="font-heading font-bold text-primary text-sm whitespace-nowrap">
-            ₹{item.price}
-          </span>
-        </li>
-      ))}
-    </ul>
-  </div>
-);
-
-// ── data ─────────────────────────────────────────────────────────
-const indianVeg: MenuSection = {
-  title: 'Indian Veg.',
-  note: 'Full / Half available',
-  items: [
-    { name: 'Paneer Tikka Masala', price: '370 / 190', isVeg: true },
-    { name: 'Paneer Butter Masala', price: '300', isVeg: true },
-    { name: 'Mushroom Masala', price: '350 / 180', isVeg: true },
-    { name: 'Kadhai Paneer', price: '290', isVeg: true },
-    { name: 'Paneer Punjabi', price: '300', isVeg: true },
-    { name: 'Paneer Do Pyaza', price: '290', isVeg: true },
-    { name: 'Malai Kofta', price: '310', isVeg: true },
-    { name: 'Matar Paneer', price: '200', isVeg: true },
-    { name: 'Mix Veg', price: '200', isVeg: true },
-    { name: 'Chana Dal Tadka', price: '140', isVeg: true },
-    { name: 'Plain Rice', price: '120', isVeg: true },
-    { name: 'Jeera Rice', price: '140', isVeg: true },
-    { name: 'Veg Pulao', price: '180', isVeg: true },
-    { name: 'Veg Biryani', price: '180', isVeg: true },
-    { name: 'Paneer Pakoda', price: '120', isVeg: true },
-    { name: 'Raita', price: '50', isVeg: true },
-  ],
+  );
 };
 
-const indianNonVeg: MenuSection = {
-  title: 'Indian Non Veg.',
-  note: 'Full / Half available',
-  items: [
-    { name: 'Chicken Biryani + Raita', price: '230', isVeg: false },
-    { name: 'Egg Biryani', price: '180', isEgg: true },
-    { name: 'Chicken Biryani Special', price: '300', isVeg: false },
-    { name: 'Chicken Kassa', price: '350 / 180', isVeg: false },
-    { name: 'Chicken Butter Masala', price: '350 / 180', isVeg: false },
-    { name: 'Chicken Dehati', price: '330 / 170', isVeg: false },
-    { name: 'Chicken Dehati (Full Murga)', price: '540', isVeg: false },
-    { name: 'Chicken Kadai', price: '340 / 180', isVeg: false },
-    { name: 'Chicken Do Pyaza', price: '340 / 180', isVeg: false },
-    { name: 'Chicken Punjabi', price: '350', isVeg: false },
-    { name: 'Mutton Curry', price: '480 / 250', isVeg: false },
-    { name: 'Fish Curry', price: '290', isVeg: false },
-    { name: 'Fish Fry (4 pcs)', price: '240', isVeg: false },
-    { name: 'Mutton Rogan Josh', price: '480', isVeg: false },
-    { name: 'Egg Curry (4 pcs)', price: '180', isEgg: true },
-    { name: 'Murgh Musallam', price: '590', isVeg: false },
-    { name: 'Chicken Lababdar', price: '360', isVeg: false },
-    { name: 'Chicken Fry (12 pcs)', price: '360', isVeg: false },
-    { name: 'Chicken Methi', price: '340', isVeg: false },
-  ],
-};
+const indianVeg: MenuSection = { title: 'Indian Veg.', note: 'Full / Half available', items: [{ name: 'Paneer Tikka Masala', price: '370 / 190', isVeg: true }, { name: 'Paneer Butter Masala', price: '300', isVeg: true }, { name: 'Mushroom Masala', price: '350 / 180', isVeg: true }, { name: 'Kadhai Paneer', price: '290', isVeg: true }, { name: 'Malai Kofta', price: '310', isVeg: true }, { name: 'Matar Paneer', price: '200', isVeg: true }, { name: 'Mix Veg', price: '200', isVeg: true }, { name: 'Chana Dal Tadka', price: '140', isVeg: true }, { name: 'Plain Rice', price: '120', isVeg: true }, { name: 'Jeera Rice', price: '140', isVeg: true }, { name: 'Veg Pulao', price: '180', isVeg: true }, { name: 'Veg Biryani', price: '180', isVeg: true }, { name: 'Paneer Pakoda', price: '120', isVeg: true }, { name: 'Raita', price: '50', isVeg: true }] };
+const indianNonVeg: MenuSection = { title: 'Indian Non Veg.', note: 'Full / Half available', items: [{ name: 'Chicken Biryani + Raita', price: '230', isVeg: false }, { name: 'Egg Biryani', price: '180', isEgg: true }, { name: 'Chicken Biryani Special', price: '300', isVeg: false }, { name: 'Chicken Kassa', price: '350 / 180', isVeg: false }, { name: 'Chicken Butter Masala', price: '350 / 180', isVeg: false }, { name: 'Chicken Dehati', price: '330 / 170', isVeg: false }, { name: 'Chicken Kadai', price: '340 / 180', isVeg: false }, { name: 'Mutton Curry', price: '480 / 250', isVeg: false }, { name: 'Fish Curry', price: '290', isVeg: false }, { name: 'Fish Fry (4 pcs)', price: '240', isVeg: false }, { name: 'Egg Curry (4 pcs)', price: '180', isEgg: true }, { name: 'Murgh Musallam', price: '590', isVeg: false }, { name: 'Chicken Fry (12 pcs)', price: '360', isVeg: false }] };
+const tandoor: MenuSection = { title: 'Tandoor', note: 'Full / Half available', items: [{ name: 'Paneer Tikka', price: '250', isVeg: true }, { name: 'Paneer Malai Tikka', price: '260', isVeg: true }, { name: 'Chicken Tikka', price: '310', isVeg: false }, { name: 'Chicken Malai Tikka', price: '310', isVeg: false }, { name: 'Chicken Tandoori', price: '420 / 220', isVeg: false }, { name: 'Chicken Seekh Kabab', price: '380', isVeg: false }, { name: 'Mutton Seekh Kabab', price: '540 / 260', isVeg: false }, { name: 'Tandoori Momo', price: '190', isVeg: true }, { name: 'Mushroom Tikka', price: '360', isVeg: true }, { name: 'Veg Seekh Kabab', price: '330', isVeg: true }] };
+const chinese: MenuSection = { title: 'Chinese', note: 'Full / Half available', items: [{ name: 'Veg Manchurian', price: '220', isVeg: true }, { name: 'Paneer Manchurian', price: '240', isVeg: true }, { name: 'Chicken Lollipop', price: '300', isVeg: false }, { name: 'Chicken Fried Rice', price: '220', isVeg: false }, { name: 'Veg Fried Rice', price: '180', isVeg: true }, { name: 'Egg Fried Rice', price: '180', isEgg: true }, { name: 'Veg Noodles', price: '150', isVeg: true }, { name: 'Chicken Noodles', price: '230', isVeg: false }, { name: 'Schezwan Noodles', price: '190', isVeg: true }, { name: 'Chicken Chilli Boneless', price: '300 / 160', isVeg: false }, { name: 'Paneer Chilli', price: '240', isVeg: true }, { name: 'Honey Chicken Chilli', price: '300', isVeg: false }] };
+const soup: MenuSection = { title: 'Soup', items: [{ name: 'Veg Hot & Sour', price: '100', isVeg: true }, { name: 'Chicken Hot & Sour', price: '120', isVeg: false }, { name: 'Veg Manchow', price: '100', isVeg: true }, { name: 'Sweet Corn Veg Soup', price: '100', isVeg: true }, { name: 'Sweet Corn Chicken Soup', price: '120', isVeg: false }] };
+const rolls: MenuSection = { title: 'Rolls', items: [{ name: 'Egg Roll', price: '70', isEgg: true }, { name: 'Double Egg Roll', price: '80', isEgg: true }, { name: 'Chicken Roll', price: '100', isVeg: false }, { name: 'Chicken Egg Roll', price: '110', isVeg: false }, { name: 'Chicken Tikka Egg Roll', price: '140', isVeg: false }, { name: 'Paneer Roll', price: '100', isVeg: true }] };
+const momo: MenuSection = { title: 'Momo', items: [{ name: 'Paneer Momo Steam', price: '90', isVeg: true }, { name: 'Paneer Momo Fried', price: '100', isVeg: true }, { name: 'Chicken Momo Steam', price: '130', isVeg: false }, { name: 'Chicken Momo Fried', price: '140', isVeg: false }] };
+const roti: MenuSection = { title: 'Roti', items: [{ name: 'Tandoori Roti / Butter Roti', price: '25 / 30', isVeg: true }, { name: 'Lachha Paratha', price: '40', isVeg: true }, { name: 'Naan / Butter Naan', price: '35 / 40', isVeg: true }, { name: 'Garlic Naan', price: '45', isVeg: true }, { name: 'Rumali Roti', price: '50', isVeg: true }, { name: 'Veg Kulcha', price: '150', isVeg: true }] };
+const thali: MenuSection = { title: 'Thali', items: [{ name: 'Veg Thali', price: '210', isVeg: true }, { name: 'Non Veg Thali', price: '250', isVeg: false }] };
+const beverage: MenuSection = { title: 'Beverage', items: [{ name: 'Tea', price: '30', isVeg: true }, { name: 'Coffee', price: '30', isVeg: true }, { name: 'Cold Drink', price: 'On request', isVeg: true }, { name: 'Water', price: 'Complimentary', isVeg: true }] };
+const dessert: MenuSection = { title: 'Dessert', items: [{ name: 'Sweets', price: 'Seasonal', isVeg: true }, { name: 'Rasgulla', price: 'Seasonal', isVeg: true }, { name: 'Halwa', price: 'Seasonal', isVeg: true }, { name: 'Dahi Sudha', price: 'Seasonal', isVeg: true }] };
 
-const tandoor: MenuSection = {
-  title: 'Tandoor',
-  note: 'Full / Half available',
-  items: [
-    { name: 'Paneer Tikka', price: '250', isVeg: true },
-    { name: 'Paneer Malai Tikka', price: '260', isVeg: true },
-    { name: 'Chicken Tikka', price: '310', isVeg: false },
-    { name: 'Chicken Malai Tikka', price: '310', isVeg: false },
-    { name: 'Chicken Haryali Tikka', price: '310', isVeg: false },
-    { name: 'Chicken Tandoori', price: '420 / 220', isVeg: false },
-    { name: 'Chicken Tandoori Kabab', price: '340', isVeg: false },
-    { name: 'Chicken Reshmi Kabab', price: '360', isVeg: false },
-    { name: 'Chicken Patiala', price: '380 / 200', isVeg: false },
-    { name: 'Tandoori Momo', price: '190', isVeg: true },
-    { name: 'Barra Kabab', price: '480 / 250', isVeg: false },
-    { name: 'Murg Whole Tandoori', price: '480', isVeg: false },
-    { name: 'Mutton Seekh Kabab', price: '540 / 260', isVeg: false },
-    { name: 'Murg Anmol', price: '480 / 250', isVeg: false },
-    { name: 'Mushroom Tikka', price: '360', isVeg: true },
-    { name: 'Veg Seekh Kabab', price: '330', isVeg: true },
-    { name: 'Chicken Seekh Kabab', price: '380', isVeg: false },
-  ],
-};
-
-const chinese: MenuSection = {
-  title: 'Chinese',
-  note: 'Full / Half available',
-  items: [
-    { name: 'Veg Manchurian', price: '220', isVeg: true },
-    { name: 'Paneer Manchurian', price: '240', isVeg: true },
-    { name: 'Spring Roll (Veg)', price: '150', isVeg: true },
-    { name: 'Spring Roll (Non Veg)', price: '190', isVeg: false },
-    { name: 'Crispy Baby Corn Chilli', price: '240', isVeg: true },
-    { name: 'Paneer Chilli', price: '240', isVeg: true },
-    { name: 'Chicken Lollipop', price: '300', isVeg: false },
-    { name: 'Chicken Fried Rice', price: '220', isVeg: false },
-    { name: 'Veg Fried Rice', price: '180', isVeg: true },
-    { name: 'Egg Fried Rice', price: '180', isEgg: true },
-    { name: 'Veg Noodles', price: '150', isVeg: true },
-    { name: 'Chilli Garlic Noodles', price: '200', isVeg: true },
-    { name: 'Chicken Noodles', price: '230', isVeg: false },
-    { name: 'Paneer Noodles', price: '180', isVeg: true },
-    { name: 'Egg Noodles', price: '180', isEgg: true },
-    { name: 'Schezwan Noodles', price: '190', isVeg: true },
-    { name: 'Chicken Chilli Bone', price: '300 / 160', isVeg: false },
-    { name: 'Chicken Chilli Boneless', price: '300 / 160', isVeg: false },
-    { name: 'Paneer Satte', price: '270', isVeg: true },
-    { name: 'Tost Chilli Momo (Veg)', price: '180', isVeg: true },
-    { name: 'Tost Chilli Momo (Non Veg)', price: '200', isVeg: false },
-    { name: 'Mushroom Chilli', price: '270', isVeg: true },
-    { name: 'Corn Salt & Pepper', price: '240', isVeg: true },
-    { name: 'Honey Chicken Chilli', price: '300', isVeg: false },
-    { name: 'Garlic Chilli', price: '300', isVeg: true },
-  ],
-};
-
-const soup: MenuSection = {
-  title: 'Soup',
-  items: [
-    { name: 'Veg Hot & Sour', price: '100', isVeg: true },
-    { name: 'Chicken Hot & Sour', price: '120', isVeg: false },
-    { name: 'Veg Manchow', price: '100', isVeg: true },
-    { name: 'Sweet Corn Veg Soup', price: '100', isVeg: true },
-    { name: 'Sweet Corn Chicken Soup', price: '120', isVeg: false },
-  ],
-};
-
-const rolls: MenuSection = {
-  title: 'Rolls',
-  items: [
-    { name: 'Egg Roll', price: '70', isEgg: true },
-    { name: 'Double Egg Roll', price: '80', isEgg: true },
-    { name: 'Chicken Roll', price: '100', isVeg: false },
-    { name: 'Chicken Egg Roll', price: '110', isVeg: false },
-    { name: 'Double Egg & Double Chicken Roll', price: '150', isVeg: false },
-    { name: 'Chicken Tikka Egg Roll', price: '140', isVeg: false },
-    { name: 'Paneer Roll', price: '100', isVeg: true },
-  ],
-};
-
-const momo: MenuSection = {
-  title: 'Momo',
-  items: [
-    { name: 'Paneer Momo Steam', price: '90', isVeg: true },
-    { name: 'Paneer Momo Fried', price: '100', isVeg: true },
-    { name: 'Chicken Momo Steam', price: '130', isVeg: false },
-    { name: 'Chicken Momo Fried', price: '140', isVeg: false },
-  ],
-};
-
-const roti: MenuSection = {
-  title: 'Roti',
-  items: [
-    { name: 'Tandoori Roti / Butter Roti', price: '25 / 30', isVeg: true },
-    { name: 'Lachha Paratha', price: '40', isVeg: true },
-    { name: 'Naan / Butter Naan', price: '35 / 40', isVeg: true },
-    { name: 'Stuffed Naan', price: '50', isVeg: true },
-    { name: 'Garlic Naan', price: '45', isVeg: true },
-    { name: 'Rumali Roti', price: '50', isVeg: true },
-    { name: 'Veg Kulcha', price: '150', isVeg: true },
-    { name: 'Non Veg Kulcha', price: '150', isVeg: false },
-  ],
-};
-
-const thali: MenuSection = {
-  title: 'Thali',
-  items: [
-    { name: 'Veg Thali', price: '210', isVeg: true },
-    { name: 'Non Veg Thali', price: '250', isVeg: false },
-  ],
-};
-
-const beverage: MenuSection = {
-  title: 'Beverage',
-  items: [
-    { name: 'Tea', price: '30', isVeg: true },
-    { name: 'Coffee', price: '30', isVeg: true },
-    { name: 'Cold Drink', price: 'On request', isVeg: true },
-    { name: 'Water', price: 'Complimentary', isVeg: true },
-  ],
-};
-
-const dessert: MenuSection = {
-  title: 'Dessert',
-  items: [
-    { name: 'Sweets', price: 'Seasonal', isVeg: true },
-    { name: 'Rasgulla', price: 'Seasonal', isVeg: true },
-    { name: 'Halwa', price: 'Seasonal', isVeg: true },
-    { name: 'Dahi Sudha', price: 'Seasonal', isVeg: true },
-  ],
-};
-
-// ── tab config ───────────────────────────────────────────────────
 const tabs = [
   { id: 'all', label: 'All' },
   { id: 'veg', label: '🟢 Veg' },
@@ -265,155 +75,79 @@ const tabs = [
   { id: 'snacks', label: '🥙 Snacks & More' },
 ];
 
-// ── page ─────────────────────────────────────────────────────────
 export const MenuPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all');
 
-  const showVeg = activeTab === 'all' || activeTab === 'veg';
-  const showNonVeg = activeTab === 'all' || activeTab === 'nonveg';
-  const showTandoor = activeTab === 'all' || activeTab === 'tandoor';
-  const showChinese = activeTab === 'all' || activeTab === 'chinese';
-  const showSnacks = activeTab === 'all' || activeTab === 'snacks';
+  const showCategory = (cat: 'indian' | 'tandoor' | 'chinese' | 'snacks') => {
+    if (activeTab === 'all' || activeTab === 'veg' || activeTab === 'nonveg') return true;
+    if (activeTab === 'tandoor') return cat === 'tandoor';
+    if (activeTab === 'chinese') return cat === 'chinese';
+    if (activeTab === 'snacks') return cat === 'snacks';
+    return true;
+  };
+
+  // item-level filter passed down to MenuCard
+  const itemFilter = activeTab;
 
   return (
-    <div className="pt-24 pb-24 min-h-screen bg-background relative">
-      {/* subtle pattern */}
-      <div className="absolute inset-0 bg-indian-pattern opacity-[0.02] pointer-events-none" />
+    <div className="pt-24 pb-24 min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-14">
+          <div className="flex justify-center mb-4">
+            <Badge>Metro Food Court</Badge>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-heading text-foreground mb-4">Our Full Menu</h1>
+          <p className="text-foreground/60 max-w-xl mx-auto text-lg">Fresh ingredients · Authentic recipes · Cooked to order</p>
 
-        {/* ── Hero ── */}
-        <div className="text-center mb-14 mt-4">
-          <span className="inline-flex items-center gap-2 py-1.5 px-5 rounded-full bg-surface border border-accent/30 text-xs font-bold tracking-[0.25em] text-primary uppercase mb-6 shadow-sm">
-            <span className="w-1 h-1 rounded-full bg-accent" />
-            Metro Food Court
-            <span className="w-1 h-1 rounded-full bg-accent" />
-          </span>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-heading text-secondary mb-4 leading-tight">
-            Our Full Menu
-          </h1>
-          <p className="text-text/60 max-w-xl mx-auto text-lg font-light">
-            Fresh ingredients · Authentic recipes · Cooked to order
-          </p>
-
-          {/* legend */}
-          <div className="flex items-center justify-center gap-6 mt-6 text-sm font-medium text-text/70">
-            <span className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-green-600">
-                <span className="w-2 h-2 rounded-full bg-green-600" />
-              </span>
-              Vegetarian
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-red-600">
-                <span className="w-2 h-2 rounded-full bg-red-600" />
-              </span>
-              Non-Vegetarian
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-4 h-4 border-2 border-yellow-500">
-                <span className="w-2 h-2 rounded-full bg-yellow-500" />
-              </span>
-              Egg
-            </span>
+          {/* Legend */}
+          <div className="flex items-center justify-center gap-6 mt-6 text-sm text-foreground/70">
+            <span className="flex items-center gap-2"><span className="inline-flex items-center justify-center w-4 h-4 border-2 border-green-600"><span className="w-2 h-2 rounded-full bg-green-600" /></span>Vegetarian</span>
+            <span className="flex items-center gap-2"><span className="inline-flex items-center justify-center w-4 h-4 border-2 border-red-600"><span className="w-2 h-2 rounded-full bg-red-600" /></span>Non-Veg</span>
+            <span className="flex items-center gap-2"><span className="inline-flex items-center justify-center w-4 h-4 border-2 border-amber-600"><span className="w-2 h-2 rounded-full bg-amber-600" /></span>Egg</span>
           </div>
         </div>
 
-        {/* ── Free delivery badge ── */}
-        <div className="flex justify-center mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 sm:gap-3 bg-primary text-white font-heading text-sm sm:text-lg uppercase tracking-widest px-5 sm:px-8 py-2.5 sm:py-3 border-4 border-secondary shadow-[4px_4px_0px_#111] rotate-[-1deg] text-center">
+        {/* Free Delivery badge */}
+        <div className="flex justify-center mb-10">
+          <div className="inline-flex items-center gap-2 bg-main text-main-foreground font-heading text-base uppercase tracking-widest px-8 py-3 border-2 border-border shadow-shadow rotate-[-1deg]">
             🚀 Free Home Delivery
           </div>
         </div>
 
-        {/* ── Filter Tabs ── */}
-        <div className="-mx-4 px-4 overflow-x-auto scrollbar-none mb-8 sm:mb-12">
-          <div className="flex gap-2 pb-1 min-w-max sm:min-w-0 sm:flex-wrap sm:justify-center">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-heading text-xs sm:text-sm font-semibold uppercase tracking-wide transition-all duration-200 border-2 ${
-                  activeTab === tab.id
-                    ? 'bg-primary text-white border-primary shadow-md'
-                    : 'bg-white text-secondary border-secondary/20 hover:border-primary hover:text-primary'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* Filter Tabs */}
+        <div className="-mx-4 px-4 overflow-x-auto scrollbar-none mb-10">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex justify-center">
+            <TabsList className="min-w-max sm:min-w-0 sm:flex-wrap">
+              {tabs.map(tab => (
+                <TabsTrigger key={tab.id} value={tab.id}>{tab.label}</TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </div>
 
-        {/* ── Grid ── */}
+        {/* Menu Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
-
-          {/* Indian Veg */}
-          {showVeg && (
-            <div className="md:col-span-2 xl:col-span-1">
-              <MenuCard section={indianVeg} accent="bg-green-700" />
-            </div>
-          )}
-
-          {/* Indian Non Veg */}
-          {showNonVeg && (
-            <div className="md:col-span-2 xl:col-span-1">
-              <MenuCard section={indianNonVeg} accent="bg-red-700" />
-            </div>
-          )}
-
-          {/* Tandoor */}
-          {showTandoor && (
-            <div className="md:col-span-2 xl:col-span-1">
-              <MenuCard section={tandoor} accent="bg-orange-700" />
-            </div>
-          )}
-
-          {/* Chinese */}
-          {showChinese && (
-            <div className="md:col-span-2 xl:col-span-1">
-              <MenuCard section={chinese} accent="bg-red-600" />
-            </div>
-          )}
-
-          {/* Soup + Rolls side by side */}
-          {showSnacks && (
-            <>
-              <div>
-                <MenuCard section={soup} accent="bg-teal-700" />
-              </div>
-              <div>
-                <MenuCard section={rolls} accent="bg-amber-700" />
-              </div>
-              <div>
-                <MenuCard section={momo} accent="bg-purple-700" />
-              </div>
-              <div>
-                <MenuCard section={roti} accent="bg-yellow-700" />
-              </div>
-              <div>
-                <MenuCard section={thali} accent="bg-primary" />
-              </div>
-            </>
-          )}
-
-          {/* Beverage + Dessert — always shown */}
-          {(activeTab === 'all' || activeTab === 'snacks') && (
-            <>
-              <div>
-                <MenuCard section={beverage} accent="bg-sky-700" />
-              </div>
-              <div>
-                <MenuCard section={dessert} accent="bg-pink-700" />
-              </div>
-            </>
-          )}
+          {showCategory('indian') && <div className="md:col-span-2 xl:col-span-1"><MenuCard section={indianVeg} accentClass="bg-green-700" filterTab={itemFilter} /></div>}
+          {showCategory('indian') && <div className="md:col-span-2 xl:col-span-1"><MenuCard section={indianNonVeg} accentClass="bg-red-700" filterTab={itemFilter} /></div>}
+          {showCategory('tandoor') && <div className="md:col-span-2 xl:col-span-1"><MenuCard section={tandoor} accentClass="bg-orange-700" filterTab={itemFilter} /></div>}
+          {showCategory('chinese') && <div className="md:col-span-2 xl:col-span-1"><MenuCard section={chinese} accentClass="bg-red-600" filterTab={itemFilter} /></div>}
+          {showCategory('snacks') && <>
+            <div><MenuCard section={soup} accentClass="bg-teal-700" filterTab={itemFilter} /></div>
+            <div><MenuCard section={rolls} accentClass="bg-amber-700" filterTab={itemFilter} /></div>
+            <div><MenuCard section={momo} accentClass="bg-purple-700" filterTab={itemFilter} /></div>
+            <div><MenuCard section={roti} accentClass="bg-yellow-700" filterTab={itemFilter} /></div>
+            <div><MenuCard section={thali} accentClass="bg-main" filterTab={itemFilter} /></div>
+          </>}
+          {showCategory('snacks') && <>
+            <div><MenuCard section={beverage} accentClass="bg-sky-700" filterTab={itemFilter} /></div>
+            <div><MenuCard section={dessert} accentClass="bg-pink-700" filterTab={itemFilter} /></div>
+          </>}
         </div>
 
-        {/* ── Footer note ── */}
-        <p className="text-center text-text/40 text-xs mt-16 font-light">
-          * Prices are inclusive of all taxes. Menu items and prices subject to change without prior notice.
-          Half portions available for select items as indicated.
+        <p className="text-center text-foreground/40 text-xs mt-16">
+          * Prices inclusive of all taxes. Menu items and prices subject to change without prior notice.
         </p>
       </div>
     </div>

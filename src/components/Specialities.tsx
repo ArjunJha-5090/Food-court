@@ -12,33 +12,29 @@ const specialities = [
 
 export const Specialities: React.FC = () => {
   return (
-    <section id="specialities" className="py-12 md:py-24 bg-background">
+    <section id="specialities" className="py-12 md:py-24 bg-background border-t-2 border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeading 
-          title="Metro Specialities" 
+        <SectionHeading
+          title="Metro Specialities"
           subtitle="Discover the most loved and highly recommended dishes across our entire food court."
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
           {specialities.map((item, index) => (
-            <div 
-              key={index} 
-              className="group relative overflow-hidden rounded-2xl cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300 aspect-[4/3]"
+            <div
+              key={index}
+              className="group relative overflow-hidden border-2 border-border shadow-shadow hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-150 cursor-pointer aspect-[4/3]"
             >
-              <img 
-                src={item.image} 
-                alt={item.name} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
-              
-              <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                <h3 className="font-heading font-bold text-xl md:text-2xl text-white mb-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+              <div className="absolute inset-0 bg-foreground/50 group-hover:bg-foreground/70 transition-colors duration-200" />
+              <div className="absolute inset-0 p-4 flex flex-col justify-end">
+                <h3 className="font-heading text-xl md:text-2xl text-background">
                   {item.name}
                 </h3>
-                <p className="text-white/80 text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 hidden sm:block">
-                  Lorem ipsum dolor sit amet, consectetur elit.
-                </p>
               </div>
             </div>
           ))}

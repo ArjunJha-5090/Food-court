@@ -1,4 +1,5 @@
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 
 interface SectionHeadingProps {
   title: string;
@@ -18,19 +19,21 @@ export const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <div className={`mb-12 ${centered ? 'text-center' : 'text-left'} ${className}`}>
       {badge && (
-        <span className="inline-block py-1 px-3 rounded-full bg-accent/20 text-accent border border-accent/30 text-sm font-medium tracking-wider uppercase mb-4">
-          {badge}
-        </span>
+        <div className={`mb-4 ${centered ? 'flex justify-center' : ''}`}>
+          <Badge>{badge}</Badge>
+        </div>
       )}
-      <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-secondary mb-4">
+      <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-foreground mb-4">
         {title}
       </h2>
       {subtitle && (
-        <p className="text-text/70 max-w-2xl mx-auto text-lg">
+        <p className="text-foreground/70 max-w-2xl mx-auto text-lg">
           {subtitle}
         </p>
       )}
-      {centered && <div className="indian-divider mt-6" />}
+      {centered && (
+        <div className="w-24 h-1 bg-main border-2 border-border mx-auto mt-6 shadow-shadow" />
+      )}
     </div>
   );
 };
